@@ -13,51 +13,43 @@ const getWeb3 = () =>
         try {
           // Request account access if needed
           var enable_output = await window.ethereum.enable();
-          console.log(enable_output);
+          //console.log(enable_output); //should be a contract address
           // Acccounts now exposed
           resolve(web3);
 
           //console.log(web3.accounts);
           var accounts = await web3.eth.getAccounts();
-       
 
+          //this sets up the contract instance
           var contract_abi = PrisonersDilemma['abi'];
           var contract = await new web3.eth.Contract(contract_abi);
-          console.log("contract instance: ");
+          console.log("contract data: ");
           console.log(contract);
 
-          var contract_byte_code = PrisonersDilemma['bytecode'];
+          var contract_bytecode = PrisonersDilemma['bytecode'];
           var options = {
-              data : contract_byte_code, 
+              data : contract_bytecode, 
               arguments : [
                   [accounts[0], 0, 0],
-                  [accounts[1], 0, 0],
+                  [accounts[0], 0, 0],
                   [20, 5, 1, 0]
               ]
           };
-          var transaction_object = await contract.deploy(options);
-          console.log("transaction object: ");
-          console.log(transaction_object);
 
-          console.log("sendTransaction");
-          var output = web3.eth.sendTransaction(transaction_object);
-          console.log(output);
-
-          console.log("transaction_object.send()");
-//          var contract_instance = await transaction_object.send({
-//              from: accounts[0],
-//              gas: 1500000,
-//              gasPrice: '30000000000000'
-//          });
-//
-//          console.log(contract_instance);
+          //contract is deployed after the transaction is confirmed
+          //contract address should be visible now
+          var contract = await contract.deploy(options).send(
+              {
+                  from: accounts[0],
+                  gas: 1500000,
+                  gasPrice: '15000000'
+              }
+          );
+          console.log(contract);
+          console.log("contract should ahve an address now!");
+          console.log(contract._address);
 
 
-//          var signature = await web3.eth.personal.sign('testing', accounts[0], "");
-//          console.log("signature: " + signature);
-//
-//          var account = await web3.eth.personal.ecRecover('testing', signature, "");
-//          console.log(account);
         } catch (error) {
           reject(error);
         }
